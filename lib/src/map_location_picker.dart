@@ -126,6 +126,12 @@ class MapLocationPicker extends StatefulWidget {
   /// origin: Location(lat: -33.852, lng: 151.211),
   final Location? origin;
 
+  /// Determines whether the current position should be acquired when the map location picker is initialized
+  /// If true, the current location will be fetched using Geolocator during initialization
+  /// If false, the initial position will be set based on the provided `currentLatLng` (if available)
+  /// Default is false, which allows setting a custom location for initialization.
+  final bool acquirePositionOnInit;
+
   /// currentLatLng init location for camera position
   /// currentLatLng: Location(lat: -33.852, lng: 151.211),
   final LatLng? currentLatLng;
@@ -397,6 +403,7 @@ class MapLocationPicker extends StatefulWidget {
     this.decoration,
     this.bottomCardBuilder,
     this.debounceDuration = const Duration(milliseconds: 500),
+    this.acquirePositionOnInit = false
   });
 
   @override
@@ -428,8 +435,14 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
   /// Search text field controller
   late TextEditingController _searchController = TextEditingController();
 
+  bool _isLoading = false;
+
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
     final additionalMarkers = widget.additionalMarkers?.entries
             .map(
               (e) => Marker(
@@ -459,10 +472,9 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                 /// set zoom level
                 _zoom = position.zoom;
               },
-              initialCameraPosition: CameraPosition(
-                target: _initialPosition,
-                zoom: _zoom,
-              ),
+              initialCameraPosition: _isLoading
+                  ? CameraPosition(target: LatLng(0, 0), zoom: 0) // some default position
+                  : CameraPosition(target: _initialPosition, zoom: _zoom),
               onTap: (LatLng position) async {
                 _initialPosition = position;
                 final controller = await _controller.future;
@@ -650,34 +662,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                           widget.getLocation!.call();
                         }
 
-                        /// get current location
-                        if (widget.hasLocationPermission) {
-                          await Geolocator.requestPermission();
-                          Position position =
-                              await Geolocator.getCurrentPosition(
-                            desiredAccuracy: widget.desiredAccuracy,
-                          );
-                          LatLng latLng =
-                              LatLng(position.latitude, position.longitude);
-                          _initialPosition = latLng;
-                          final controller = await _controller.future;
-
-                          /// animate camera to current location
-                          controller.animateCamera(
-                            CameraUpdate.newCameraPosition(
-                              cameraPosition(),
-                            ),
-                          );
-
-                          /// decode address from latitude & longitude
-                          _decodeAddress(
-                            Location(
-                              lat: position.latitude,
-                              lng: position.longitude,
-                            ),
-                          );
-                          setState(() {});
-                        }
+                        _getCurrentPosition();
                       },
                       child: Icon(widget.fabIcon),
                     ),
@@ -770,7 +755,12 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
 
   @override
   void initState() {
-    _initialPosition = widget.currentLatLng ?? _initialPosition;
+    if (widget.acquirePositionOnInit) {
+      _isLoading = true;
+      _getCurrentPosition();
+    } else {
+      _initialPosition = widget.currentLatLng ?? _initialPosition;
+    }
     _mapType = widget.mapType;
     _searchController = widget.searchController ?? _searchController;
     if (widget.currentLatLng != null) {
@@ -828,6 +818,47 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
       setState(() {});
     } catch (e) {
       logger.e(e);
+    }
+  }
+
+  void _getCurrentPosition() async {
+    /// get current location
+    if (widget.hasLocationPermission) {
+      try {
+        await Geolocator.requestPermission();
+        Position position =
+        await Geolocator.getCurrentPosition(
+            locationSettings: LocationSettings(
+                accuracy: widget.desiredAccuracy));
+        LatLng latLng =
+        LatLng(position.latitude, position.longitude);
+        _initialPosition = latLng;
+        setState(() {
+          _isLoading = false;
+        });
+        final controller = await _controller.future;
+
+        /// animate camera to current location
+        controller.animateCamera(
+          CameraUpdate.newCameraPosition(
+            cameraPosition(),
+          ),
+        );
+
+        /// decode address from latitude & longitude
+        _decodeAddress(
+          Location(
+            lat: position.latitude,
+            lng: position.longitude,
+          ),
+        );
+        setState(() {});
+      } on PermissionDeniedException {
+        _initialPosition = widget.currentLatLng ?? _initialPosition;
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 }

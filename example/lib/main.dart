@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:map_location_picker/map_location_picker.dart';
 
-import 'key.dart';
-
 void main() {
   runApp(
     const MaterialApp(
@@ -39,7 +37,7 @@ class _MyAppState extends State<MyApp> {
         children: [
           PlacesAutocomplete(
             searchController: _controller,
-            apiKey: YOUR_API_KEY,
+            apiKey: "YOUR_API_KEY",
             mounted: mounted,
             hideBackButton: true,
             debounceDuration: const Duration(milliseconds: 500),
@@ -96,22 +94,24 @@ class _MyAppState extends State<MyApp> {
             child: Text(
               "Google Map Location Picker\nMade By Arvind 😃 with Flutter 🚀",
               textAlign: TextAlign.center,
-              textScaleFactor: 1.2,
               style: TextStyle(
                 color: Colors.grey,
+                fontSize: 16 *
+                    1.2, // Use your custom scaler here (1.2 is equivalent to textScaleFactor)
               ),
             ),
           ),
           TextButton(
             onPressed: () => Clipboard.setData(
               const ClipboardData(text: "https://www.mohesu.com"),
-            ).then(
-              (value) => ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Copied to Clipboard"),
-                ),
-              ),
-            ),
+            ).then((value) => {
+                  if (context.mounted)
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Copied to Clipboard"),
+                      ),
+                    ),
+                }),
             child: const Text("https://www.mohesu.com"),
           ),
           const Spacer(),
@@ -124,7 +124,7 @@ class _MyAppState extends State<MyApp> {
                   MaterialPageRoute(
                     builder: (context) {
                       return MapLocationPicker(
-                        apiKey: YOUR_API_KEY,
+                        apiKey: "YOUR_API_KEY",
                         popOnNextButtonTaped: true,
                         currentLatLng: const LatLng(29.146727, 76.464895),
                         debounceDuration: const Duration(milliseconds: 500),
