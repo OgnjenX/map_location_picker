@@ -309,102 +309,101 @@ class MapLocationPicker extends StatefulWidget {
   /// Duration for search debounce in milliseconds
   final Duration debounceDuration;
 
-  const MapLocationPicker({
-    super.key,
-    this.desiredAccuracy = LocationAccuracy.high,
-    required this.apiKey,
-    this.geoCodingBaseUrl,
-    this.geoCodingHttpClient,
-    this.geoCodingApiHeaders,
-    this.language,
-    this.locationType = const [],
-    this.resultType = const [],
-    this.minMaxZoomPreference = const MinMaxZoomPreference(0, 16),
-    this.padding = const EdgeInsets.all(0),
-    this.compassEnabled = true,
-    this.liteModeEnabled = false,
-    this.topCardMargin = const EdgeInsets.all(8),
-    this.topCardColor,
-    this.topCardShape = const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(12)),
-    ),
-    this.borderRadius = const BorderRadius.all(Radius.circular(12)),
-    this.searchHintText = "Start typing to search",
-    this.bottomCardShape = const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(12)),
-    ),
-    this.bottomCardMargin = const EdgeInsets.fromLTRB(8, 8, 8, 16),
-    this.bottomCardIcon = const Icon(Icons.send),
-    this.bottomCardTooltip = "Continue with this location",
-    this.bottomCardColor,
-    this.hasLocationPermission = true,
-    this.getLocation,
-    this.onSuggestionSelected,
-    this.onNext,
-    this.currentLatLng = const LatLng(28.8993468, 76.6250249),
-    this.hideBackButton = false,
-    this.popOnNextButtonTaped = false,
-    this.backButton,
-    this.hideMoreOptions = false,
-    this.dialogTitle = 'You can also use the following options',
-    this.placesHttpClient,
-    this.placesApiHeaders,
-    this.placesBaseUrl,
-    this.sessionToken,
-    this.offset,
-    this.origin,
-    this.location,
-    this.radius,
-    this.region,
-    this.fields = const [],
-    this.types = const [],
-    this.components = const [],
-    this.strictbounds = false,
-    this.mapType = MapType.normal,
-    this.hideSearchBar = false,
-    this.searchController,
-    this.additionalMarkers,
-    this.bottom = true,
-    this.left = true,
-    this.maintainBottomViewPadding = false,
-    this.minimum = EdgeInsets.zero,
-    this.right = true,
-    this.top = true,
-    this.hideLocationButton = false,
-    this.hideMapTypeButton = false,
-    this.hideBottomCard = false,
-    this.onDecodeAddress,
-    this.focusNode,
-    this.mapStyle,
-    this.fabTooltip = 'My Location',
-    this.fabIcon = Icons.my_location,
-    this.minCharsForSuggestions = 0,
-    this.buildingsEnabled = true,
-    this.cameraTargetBounds = CameraTargetBounds.unbounded,
-    this.circles = const <Circle>{},
-    this.cloudMapId,
-    this.fortyFiveDegreeImageryEnabled = false,
-    this.gestureRecognizers = const <Factory<OneSequenceGestureRecognizer>>{},
-    this.indoorViewEnabled = false,
-    this.layoutDirection,
-    this.mapToolbarEnabled = true,
-    this.onCameraIdle,
-    this.onCameraMoveStarted,
-    this.onLongPress,
-    this.polygons = const <Polygon>{},
-    this.polylines = const <Polyline>{},
-    this.rotateGesturesEnabled = true,
-    this.scrollGesturesEnabled = true,
-    this.tileOverlays = const <TileOverlay>{},
-    this.tiltGesturesEnabled = true,
-    this.trafficEnabled = true,
-    this.webGestureHandling,
-    this.zoomGesturesEnabled = true,
-    this.decoration,
-    this.bottomCardBuilder,
-    this.debounceDuration = const Duration(milliseconds: 500),
-    this.acquirePositionOnInit = false
-  });
+  const MapLocationPicker(
+      {super.key,
+      this.desiredAccuracy = LocationAccuracy.high,
+      required this.apiKey,
+      this.geoCodingBaseUrl,
+      this.geoCodingHttpClient,
+      this.geoCodingApiHeaders,
+      this.language,
+      this.locationType = const [],
+      this.resultType = const [],
+      this.minMaxZoomPreference = const MinMaxZoomPreference(0, 16),
+      this.padding = const EdgeInsets.all(0),
+      this.compassEnabled = true,
+      this.liteModeEnabled = false,
+      this.topCardMargin = const EdgeInsets.all(8),
+      this.topCardColor,
+      this.topCardShape = const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+      ),
+      this.borderRadius = const BorderRadius.all(Radius.circular(12)),
+      this.searchHintText = "Start typing to search",
+      this.bottomCardShape = const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+      ),
+      this.bottomCardMargin = const EdgeInsets.fromLTRB(8, 8, 8, 16),
+      this.bottomCardIcon = const Icon(Icons.send),
+      this.bottomCardTooltip = "Continue with this location",
+      this.bottomCardColor,
+      this.hasLocationPermission = true,
+      this.getLocation,
+      this.onSuggestionSelected,
+      this.onNext,
+      this.currentLatLng = const LatLng(28.8993468, 76.6250249),
+      this.hideBackButton = false,
+      this.popOnNextButtonTaped = false,
+      this.backButton,
+      this.hideMoreOptions = false,
+      this.dialogTitle = 'You can also use the following options',
+      this.placesHttpClient,
+      this.placesApiHeaders,
+      this.placesBaseUrl,
+      this.sessionToken,
+      this.offset,
+      this.origin,
+      this.location,
+      this.radius,
+      this.region,
+      this.fields = const [],
+      this.types = const [],
+      this.components = const [],
+      this.strictbounds = false,
+      this.mapType = MapType.normal,
+      this.hideSearchBar = false,
+      this.searchController,
+      this.additionalMarkers,
+      this.bottom = true,
+      this.left = true,
+      this.maintainBottomViewPadding = false,
+      this.minimum = EdgeInsets.zero,
+      this.right = true,
+      this.top = true,
+      this.hideLocationButton = false,
+      this.hideMapTypeButton = false,
+      this.hideBottomCard = false,
+      this.onDecodeAddress,
+      this.focusNode,
+      this.mapStyle,
+      this.fabTooltip = 'My Location',
+      this.fabIcon = Icons.my_location,
+      this.minCharsForSuggestions = 0,
+      this.buildingsEnabled = true,
+      this.cameraTargetBounds = CameraTargetBounds.unbounded,
+      this.circles = const <Circle>{},
+      this.cloudMapId,
+      this.fortyFiveDegreeImageryEnabled = false,
+      this.gestureRecognizers = const <Factory<OneSequenceGestureRecognizer>>{},
+      this.indoorViewEnabled = false,
+      this.layoutDirection,
+      this.mapToolbarEnabled = true,
+      this.onCameraIdle,
+      this.onCameraMoveStarted,
+      this.onLongPress,
+      this.polygons = const <Polygon>{},
+      this.polylines = const <Polyline>{},
+      this.rotateGesturesEnabled = true,
+      this.scrollGesturesEnabled = true,
+      this.tileOverlays = const <TileOverlay>{},
+      this.tiltGesturesEnabled = true,
+      this.trafficEnabled = true,
+      this.webGestureHandling,
+      this.zoomGesturesEnabled = true,
+      this.decoration,
+      this.bottomCardBuilder,
+      this.debounceDuration = const Duration(milliseconds: 500),
+      this.acquirePositionOnInit = false});
 
   @override
   State<MapLocationPicker> createState() => _MapLocationPickerState();
@@ -419,7 +418,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
 
   /// initial address text
   late String _address = "Tap on map to get address";
-  
+
   /// Store the original search text for comparison
   String _originalSearchText = "";
 
@@ -476,7 +475,8 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                 _zoom = position.zoom;
               },
               initialCameraPosition: _isLoading
-                  ? CameraPosition(target: LatLng(0, 0), zoom: 0) // some default position
+                  ? CameraPosition(
+                      target: LatLng(0, 0), zoom: 0) // some default position
                   : CameraPosition(target: _initialPosition, zoom: _zoom),
               onTap: (LatLng position) async {
                 _initialPosition = position;
@@ -815,45 +815,49 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
         }
         return;
       }
-      
+
       // Get the first result as the default
       _geocodingResult = response.results.first;
       String formattedAddress = response.results.first.formattedAddress ?? "";
-      
+
       // If we have original search text, try to preserve the original house number
       if (_originalSearchText.isNotEmpty) {
         // Extract house number from original search text
         final RegExp houseNumberRegex = RegExp(r'\b\d+\b');
-        final Match? originalHouseNumberMatch = houseNumberRegex.firstMatch(_originalSearchText);
-        
+        final Match? originalHouseNumberMatch =
+            houseNumberRegex.firstMatch(_originalSearchText);
+
         if (originalHouseNumberMatch != null) {
-          final String originalHouseNumber = originalHouseNumberMatch.group(0) ?? "";
-          
+          final String originalHouseNumber =
+              originalHouseNumberMatch.group(0) ?? "";
+
           // Extract house number from the result address
-          final Match? resultHouseNumberMatch = houseNumberRegex.firstMatch(formattedAddress);
-          
+          final Match? resultHouseNumberMatch =
+              houseNumberRegex.firstMatch(formattedAddress);
+
           if (resultHouseNumberMatch != null) {
-            final String resultHouseNumber = resultHouseNumberMatch.group(0) ?? "";
-            
+            final String resultHouseNumber =
+                resultHouseNumberMatch.group(0) ?? "";
+
             // If the house numbers are different, replace the result house number with the original one
             if (resultHouseNumber != originalHouseNumber) {
-              logger.d("Replacing house number $resultHouseNumber with original $originalHouseNumber");
-              
+              logger.d(
+                  "Replacing house number $resultHouseNumber with original $originalHouseNumber");
+
               // Replace the house number in the formatted address
               formattedAddress = formattedAddress.replaceFirst(
-                resultHouseNumber, 
-                originalHouseNumber
-              );
-              
+                  resultHouseNumber, originalHouseNumber);
+
               // Create a deep copy of the geocoding result to modify
               final updatedResult = GeocodingResult(
                 geometry: _geocodingResult!.geometry,
                 placeId: _geocodingResult!.placeId,
                 formattedAddress: formattedAddress,
                 types: _geocodingResult!.types,
-                addressComponents: List<AddressComponent>.from(_geocodingResult!.addressComponents),
+                addressComponents: List<AddressComponent>.from(
+                    _geocodingResult!.addressComponents),
               );
-              
+
               // Update the address components in the geocoding result
               bool streetNumberUpdated = false;
               for (var i = 0; i < updatedResult.addressComponents.length; i++) {
@@ -872,7 +876,8 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
               }
 
               // If no street_number component was found, add one
-              if (!streetNumberUpdated && updatedResult.addressComponents.isNotEmpty) {
+              if (!streetNumberUpdated &&
+                  updatedResult.addressComponents.isNotEmpty) {
                 updatedResult.addressComponents.firstWhere(
                   (component) => component.types.contains('route'),
                   orElse: () => updatedResult.addressComponents.first,
@@ -885,15 +890,17 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                 );
 
                 // Insert the new component at the beginning of the address components
-                updatedResult.addressComponents.insert(0, newStreetNumberComponent);
+                updatedResult.addressComponents
+                    .insert(0, newStreetNumberComponent);
               }
 
               // Update the geocoding result with our modified version
               _geocodingResult = updatedResult;
-              
+
               // Also update all results in the list to maintain consistency
               if (response.results.length > 1) {
-                _geocodingResultList = List<GeocodingResult>.from(response.results);
+                _geocodingResultList =
+                    List<GeocodingResult>.from(response.results);
                 _geocodingResultList[0] = updatedResult;
               } else {
                 _geocodingResultList = [updatedResult];
@@ -912,7 +919,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
           _geocodingResultList = response.results;
         }
       }
-      
+
       _address = formattedAddress;
       widget.onDecodeAddress?.call(_geocodingResult);
       setState(() {});
@@ -926,12 +933,10 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
     if (widget.hasLocationPermission) {
       try {
         await Geolocator.requestPermission();
-        Position position =
-        await Geolocator.getCurrentPosition(
-            locationSettings: LocationSettings(
-                accuracy: widget.desiredAccuracy));
-        LatLng latLng =
-        LatLng(position.latitude, position.longitude);
+        Position position = await Geolocator.getCurrentPosition(
+            locationSettings:
+                LocationSettings(accuracy: widget.desiredAccuracy));
+        LatLng latLng = LatLng(position.latitude, position.longitude);
         _initialPosition = latLng;
         setState(() {
           _isLoading = false;
