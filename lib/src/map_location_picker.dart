@@ -419,6 +419,9 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
 
   /// initial address text
   late String _address = "Tap on map to get address";
+  
+  /// Store the original search text for comparison
+  String _originalSearchText = "";
 
   /// Map type (default: MapType.normal)
   late MapType _mapType = MapType.normal;
@@ -583,6 +586,9 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                           CameraUpdate.newCameraPosition(cameraPosition()));
                       _address = placesDetails.result.formattedAddress ?? "";
                       widget.onSuggestionSelected?.call(placesDetails);
+
+                      // Store the original search text
+                      _originalSearchText = _searchController.text;
 
                       /// _geocodingResult is used for further use
                       /// like passing to the parent widget
@@ -809,12 +815,106 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
         }
         return;
       }
-      _address = response.results.first.formattedAddress ?? "";
+      
+      // Get the first result as the default
       _geocodingResult = response.results.first;
-      widget.onDecodeAddress?.call(_geocodingResult);
-      if (response.results.length > 1) {
-        _geocodingResultList = response.results;
+      String formattedAddress = response.results.first.formattedAddress ?? "";
+      
+      // If we have original search text, try to preserve the original house number
+      if (_originalSearchText.isNotEmpty) {
+        // Extract house number from original search text
+        final RegExp houseNumberRegex = RegExp(r'\b\d+\b');
+        final Match? originalHouseNumberMatch = houseNumberRegex.firstMatch(_originalSearchText);
+        
+        if (originalHouseNumberMatch != null) {
+          final String originalHouseNumber = originalHouseNumberMatch.group(0) ?? "";
+          
+          // Extract house number from the result address
+          final Match? resultHouseNumberMatch = houseNumberRegex.firstMatch(formattedAddress);
+          
+          if (resultHouseNumberMatch != null) {
+            final String resultHouseNumber = resultHouseNumberMatch.group(0) ?? "";
+            
+            // If the house numbers are different, replace the result house number with the original one
+            if (resultHouseNumber != originalHouseNumber) {
+              logger.d("Replacing house number $resultHouseNumber with original $originalHouseNumber");
+              
+              // Replace the house number in the formatted address
+              formattedAddress = formattedAddress.replaceFirst(
+                resultHouseNumber, 
+                originalHouseNumber
+              );
+              
+              // Create a deep copy of the geocoding result to modify
+              final updatedResult = GeocodingResult(
+                geometry: _geocodingResult!.geometry,
+                placeId: _geocodingResult!.placeId,
+                formattedAddress: formattedAddress,
+                types: _geocodingResult!.types,
+                addressComponents: List<AddressComponent>.from(_geocodingResult!.addressComponents),
+              );
+              
+              // Update the address components in the geocoding result
+              bool streetNumberUpdated = false;
+              for (var i = 0; i < updatedResult.addressComponents.length; i++) {
+                final component = updatedResult.addressComponents[i];
+                if (component.types.contains('street_number')) {
+                  // Create a new component with the original house number
+                  final updatedComponent = AddressComponent(
+                    longName: originalHouseNumber,
+                    shortName: originalHouseNumber,
+                    types: component.types,
+                  );
+                  updatedResult.addressComponents[i] = updatedComponent;
+                  streetNumberUpdated = true;
+                  break;
+                }
+              }
+
+              // If no street_number component was found, add one
+              if (!streetNumberUpdated && updatedResult.addressComponents.isNotEmpty) {
+                updatedResult.addressComponents.firstWhere(
+                  (component) => component.types.contains('route'),
+                  orElse: () => updatedResult.addressComponents.first,
+                );
+
+                final newStreetNumberComponent = AddressComponent(
+                  longName: originalHouseNumber,
+                  shortName: originalHouseNumber,
+                  types: ['street_number'],
+                );
+
+                // Insert the new component at the beginning of the address components
+                updatedResult.addressComponents.insert(0, newStreetNumberComponent);
+              }
+
+              // Update the geocoding result with our modified version
+              _geocodingResult = updatedResult;
+              
+              // Also update all results in the list to maintain consistency
+              if (response.results.length > 1) {
+                _geocodingResultList = List<GeocodingResult>.from(response.results);
+                _geocodingResultList[0] = updatedResult;
+              } else {
+                _geocodingResultList = [updatedResult];
+              }
+            } else {
+              // House numbers already match, just use the results as-is
+              if (response.results.length > 1) {
+                _geocodingResultList = response.results;
+              }
+            }
+          }
+        }
+      } else {
+        // No original search text, use results as-is
+        if (response.results.length > 1) {
+          _geocodingResultList = response.results;
+        }
       }
+      
+      _address = formattedAddress;
+      widget.onDecodeAddress?.call(_geocodingResult);
       setState(() {});
     } catch (e) {
       logger.e(e);
@@ -852,6 +952,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
             lng: position.longitude,
           ),
         );
+
         setState(() {});
       } on PermissionDeniedException {
         _initialPosition = widget.currentLatLng ?? _initialPosition;
