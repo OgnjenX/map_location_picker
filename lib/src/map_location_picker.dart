@@ -479,8 +479,13 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                       target: LatLng(0, 0), zoom: 0) // some default position
                   : CameraPosition(target: _initialPosition, zoom: _zoom),
               onTap: (LatLng position) async {
+                if (!mounted) return;
+
                 _initialPosition = position;
                 final controller = await _controller.future;
+
+                if (!mounted) return;
+
                 controller.animateCamera(
                   CameraUpdate.newCameraPosition(cameraPosition()),
                 );
@@ -490,7 +495,8 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                     lng: position.longitude,
                   ),
                 );
-                setState(() {});
+
+                // Note: setState is called within _decodeAddress if mounted
               },
               onMapCreated: (GoogleMapController controller) =>
                   _controller.complete(controller),
@@ -573,6 +579,8 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                     decoration: widget.decoration,
                     debounceDuration: widget.debounceDuration,
                     onGetDetailsByPlaceId: (placesDetails) async {
+                      if (!mounted) return;
+
                       if (placesDetails == null) {
                         logger.e("placesDetails is null");
                         return;
@@ -582,6 +590,9 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                         placesDetails.result.geometry?.location.lng ?? 0,
                       );
                       final controller = await _controller.future;
+
+                      if (!mounted) return;
+
                       controller.animateCamera(
                           CameraUpdate.newCameraPosition(cameraPosition()));
                       _address = placesDetails.result.formattedAddress ?? "";
@@ -611,7 +622,7 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
                         ),
                       );
 
-                      setState(() {});
+                      // Note: setState is called within _decodeAddress if mounted
                     },
                   ),
                 Spacer(),
@@ -780,8 +791,22 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    // Dispose of any resources
+    if (_controller.isCompleted) {
+      _controller.future.then((controller) {
+        controller.dispose();
+      });
+    }
+    super.dispose();
+  }
+
   /// Decode address from latitude & longitude
   void _decodeAddress(Location location) async {
+    // Check if widget is still mounted before proceeding
+    if (!mounted) return;
+
     try {
       final geocoding = GoogleMapsGeocoding(
         apiKey: widget.apiKey,
@@ -795,6 +820,9 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
         locationType: widget.locationType,
         resultType: widget.resultType,
       );
+
+      // Check again if widget is still mounted after the async operation
+      if (!mounted) return;
 
       /// When get any error from the API, show the error in the console.
       if (response.hasNoResults ||
@@ -922,7 +950,9 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
 
       _address = formattedAddress;
       widget.onDecodeAddress?.call(_geocodingResult);
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     } catch (e) {
       logger.e(e);
     }
@@ -930,18 +960,25 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
 
   void _getCurrentPosition() async {
     /// get current location
+    if (!mounted) return;
+
     if (widget.hasLocationPermission) {
       try {
         await Geolocator.requestPermission();
         Position position = await Geolocator.getCurrentPosition(
             locationSettings:
                 LocationSettings(accuracy: widget.desiredAccuracy));
+
+        if (!mounted) return;
+
         LatLng latLng = LatLng(position.latitude, position.longitude);
         _initialPosition = latLng;
         setState(() {
           _isLoading = false;
         });
         final controller = await _controller.future;
+
+        if (!mounted) return;
 
         /// animate camera to current location
         controller.animateCamera(
@@ -958,8 +995,10 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
           ),
         );
 
-        setState(() {});
+        // Note: setState is called within _decodeAddress if mounted
       } on PermissionDeniedException {
+        if (!mounted) return;
+
         _initialPosition = widget.currentLatLng ?? _initialPosition;
         setState(() {
           _isLoading = false;
